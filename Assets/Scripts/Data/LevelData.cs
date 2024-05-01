@@ -1,5 +1,4 @@
 using UnityEngine;
-using Array2DEditor;
 
 [CreateAssetMenu(fileName = "New LevelData", menuName = "Level Data")]
 public class LevelData : ScriptableObject
