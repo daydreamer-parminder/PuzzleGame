@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a005e5418021a546b457e88f0e2bdfb, type: 3}
+  m_Name: Level1
+  m_EditorClassIdentifier: 
+  cols: 4
+  rows: 3
+  pairs: 2
+  cardPrefab: {fileID: 511409915903338341, guid: 15aa4ef47d5c6c3489d7aa177b08f172, type: 3}
+  cardSymbols:
+  - {fileID: 11400000, guid: 87ceb352746c7524991097c72cd275d4, type: 2}
+  - {fileID: 11400000, guid: 90aa0b0bcc9e552449e6e1d909ec129e, type: 2}
+  - {fileID: 11400000, guid: fb647cd12c4a96f4f82e397bde4a0aa2, type: 2}
+  - {fileID: 11400000, guid: 28497428e733b254d8e5ed396c4b28c9, type: 2}
+  - {fileID: 11400000, guid: 6091c8d123c3fea4ca7db11d0c0f023d, type: 2}
+  - {fileID: 11400000, guid: 3ca07743be426f647b427e232650a08b, type: 2}
+  padding: 15
+  hidingTime: 1
