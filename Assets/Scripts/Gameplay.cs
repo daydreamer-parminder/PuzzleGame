@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public enum GameState 
 {
@@ -14,6 +15,8 @@ public delegate void MatchEvent(int level, int turns, int matches);
 public class Gameplay : MonoBehaviour, IClickListener
 {
     [Header("Static Parms")]
+    [SerializeField]
+    protected CardData[] cardsData;
     [SerializeField]
     protected LevelData[] levels;
     [SerializeField]
@@ -34,6 +37,9 @@ public class Gameplay : MonoBehaviour, IClickListener
     [SerializeField]
     protected List<Card> playable, matched;
 
+    [Header("Progression Parms")]
+    public UnityEvent OnGameEndsCallBack;
+
     [Header("Debugging Parms")]
     public bool isForcedLevel = false;
     public int forcedLevel = 0;
@@ -43,16 +49,22 @@ public class Gameplay : MonoBehaviour, IClickListener
         userData.matchEvent = uiScore.DisplayData;
     }
 
-    // Start is called before the first frame update
-    private void Start()
+    public void StartGame() 
     {
         playable = new List<Card>();
         matched = new List<Card>();
         userData.LoadData();
-        if(isForcedLevel)
-            LoadeLevel(levels[forcedLevel]);
-        else
-            LoadeLevel(levels[userData.level - 1]);
+        if (userData.inGame == 1)
+        {
+            SetPreviousGameState();
+        }
+        else 
+        {
+            if (isForcedLevel)
+                LoadeLevel(levels[forcedLevel]);
+            else
+                LoadeLevel(levels[userData.level - 1]);
+        }
     }
 
     public virtual void LoadeLevel(LevelData level) 
@@ -60,9 +72,17 @@ public class Gameplay : MonoBehaviour, IClickListener
         currentLevel = level;
         gridBoard = new Cell[currentLevel.cols, currentLevel.rows];
 
+        SetNewCardsOnGrid();
+        Invoke("HideAllCards", currentLevel.hidingTime);
+    }
+
+    public void SetNewCardsOnGrid() 
+    {
+        // make cells and cards
+
         float cardWidth = currentLevel.cardPrefab.GetComponent<RectTransform>().rect.width;
         float cardHeight = currentLevel.cardPrefab.GetComponent<RectTransform>().rect.height;
-        for (int y = 0, ind = 1; y < currentLevel.rows; y++)
+        for (int y = 0, ind = 0; y < currentLevel.rows; y++)
         {
             for (int x = 0; x < currentLevel.cols; x++, ++ind)
             {
@@ -72,7 +92,7 @@ public class Gameplay : MonoBehaviour, IClickListener
                         new Vector3(x > 0 ? currentLevel.padding * x : 0, y > 0 ? -currentLevel.padding * y : 0, 0), // padding
                         Quaternion.identity,
                         cardsLayoutParent);
-                gridBoard[x, y].index = ind;
+                gridBoard[x, y].index = ind + 1;
 
                 Card prefabGO = Instantiate(currentLevel.cardPrefab, gridBoard[x, y].transform);
                 prefabGO.transform.localPosition = Vector3.zero;
@@ -80,12 +100,9 @@ public class Gameplay : MonoBehaviour, IClickListener
                 gridBoard[x, y].SetCard(prefabGO);
             }
         }
-        SetCardsOnGrid();
-        Invoke("HideAllCards", currentLevel.hidingTime);
-    }
 
-    public void SetCardsOnGrid() 
-    {
+        // make pairs
+
         int ttlCells = currentLevel.rows * currentLevel.cols;
         int possiblePairs = ttlCells / currentLevel.pairs;
 
@@ -129,6 +146,46 @@ public class Gameplay : MonoBehaviour, IClickListener
         }
     }
 
+    public void SetPreviousGameState()
+    {
+        currentLevel = levels[userData.level - 1];
+        gridBoard = new Cell[currentLevel.cols, currentLevel.rows];
+
+        float cardWidth = currentLevel.cardPrefab.GetComponent<RectTransform>().rect.width;
+        float cardHeight = currentLevel.cardPrefab.GetComponent<RectTransform>().rect.height;
+        string[] strArr = userData.gameState.Split(',');
+        int[] tarr = new int[strArr.Length - 1];
+        for (int i = 0; i < tarr.Length; ++i) 
+            tarr[i] = int.Parse(strArr[i]);
+        for (int y = 0, ind = 0; y < currentLevel.rows; y++)
+        {
+            for (int x = 0; x < currentLevel.cols; x++, ++ind)
+            {
+                gridBoard[x, y] = Instantiate(currentLevel.cellPrefab,
+                        startPoint.position + // starting point
+                        new Vector3(cardWidth * x, -cardHeight * y, 0) +  // card post
+                        new Vector3(x > 0 ? currentLevel.padding * x : 0, y > 0 ? -currentLevel.padding * y : 0, 0), // padding
+                        Quaternion.identity,
+                        cardsLayoutParent);
+                gridBoard[x, y].index = ind + 1;
+
+                if (tarr[ind] != -1)
+                {
+                    Card prefabGO = Instantiate(currentLevel.cardPrefab, gridBoard[x, y].transform);
+                    prefabGO.transform.localPosition = Vector3.zero;
+
+                    gridBoard[x, y].SetCard(prefabGO);
+                    prefabGO.SetData(cardsData[tarr[ind]]);
+                    prefabGO.SetPlayable(true);
+                    prefabGO.SetListener(this);
+                    playable.Add(prefabGO);
+                    //temp += gameStateData.grid[x, y].GetCard().cardData.type+",";
+                }
+            }
+        }
+        gameState = GameState.Started;
+    }
+
     public Vector2Int IndexToCords(int index, LevelData level) 
     {
         int rem = index % level.cols;
@@ -137,19 +194,6 @@ public class Gameplay : MonoBehaviour, IClickListener
             return new Vector2Int(level.cols, divnum / level.cols);
         else
             return new Vector2Int(index % level.cols, (divnum / level.cols) + 1);
-    }
-
-    public void HideAllCards() 
-    {
-        for (int x = 0; x < currentLevel.cols; ++x) 
-        {
-            for (int y = 0; y < currentLevel.rows; ++y)
-            {
-                if(gridBoard[x, y].GetCard().IsPlayable())
-                   gridBoard[x, y].GetCard().Hide();
-            }
-        }
-        gameState = GameState.Started;
     }
 
     public void OnClicked(IClickable clickable) 
@@ -179,6 +223,7 @@ public class Gameplay : MonoBehaviour, IClickListener
                         {
                             userData.LevelUp();
                             gameState = GameState.Result;
+                            OnGameEndsCallBack.Invoke();
                         }
                         userData.LoadData();
                     }
@@ -201,9 +246,64 @@ public class Gameplay : MonoBehaviour, IClickListener
         }
     }
 
-    public void ResetGame() 
+    public string ParseGridToString() 
+    {
+        string ans = "";
+
+        if (gridBoard != null)
+        {
+            for (int row = 0; row < currentLevel.rows; row++)
+            {
+                for (int col = 0; col < currentLevel.cols; col++)
+                {
+                    Cell cell = gridBoard[col, row];
+                    if (cell != null && cell.GetCard() != null)
+                    {
+                        // Append the type of the card to the string
+                        ans += cell.GetCard().IsPlayable() ? cell.GetCard().cardData.type.ToString() : -1;
+                    }
+                    else
+                    {
+                        // Append a placeholder for an empty cell
+                        ans += "-1";
+                    }
+
+                    // Add a delimiter between cells
+                    ans += ",";
+                }
+
+                // Add a newline character between rows
+                ans += "\n";
+            }
+        }
+
+        return ans;
+    }
+
+    public void HideAllCards()
+    {
+        for (int x = 0; x < currentLevel.cols; ++x)
+        {
+            for (int y = 0; y < currentLevel.rows; ++y)
+            {
+                if (gridBoard[x, y].GetCard() != null && gridBoard[x, y].GetCard().IsPlayable())
+                    gridBoard[x, y].GetCard().Hide();
+            }
+        }
+        gameState = GameState.Started;
+    }
+
+    public void ResetGame()
     {
         matched.Clear();
         gameState = GameState.NotStarted;
+    }
+
+    public void OnApplicationQuit()
+    {
+        if (gameState == GameState.Started)
+        {
+            userData.SetGameState(true, ParseGridToString());
+        }
     }
 }
