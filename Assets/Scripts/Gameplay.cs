@@ -186,16 +186,6 @@ public class Gameplay : MonoBehaviour, IClickListener
         gameState = GameState.Started;
     }
 
-    public Vector2Int IndexToCords(int index, LevelData level) 
-    {
-        int rem = index % level.cols;
-        int divnum = index - rem;
-        if (index > 0 && index % level.cols == 0) 
-            return new Vector2Int(level.cols, divnum / level.cols);
-        else
-            return new Vector2Int(index % level.cols, (divnum / level.cols) + 1);
-    }
-
     public void OnClicked(IClickable clickable) 
     {
         if (gameState == GameState.Started) 
@@ -297,6 +287,16 @@ public class Gameplay : MonoBehaviour, IClickListener
     {
         matched.Clear();
         gameState = GameState.NotStarted;
+    }
+
+    public Vector2Int IndexToCords(int index, LevelData level)
+    {
+        int rem = index % level.cols;
+        int divnum = index - rem;
+        if (index > 0 && index % level.cols == 0)
+            return new Vector2Int(level.cols, divnum / level.cols);
+        else
+            return new Vector2Int(index % level.cols, (divnum / level.cols) + 1);
     }
 
     public void OnApplicationQuit()
