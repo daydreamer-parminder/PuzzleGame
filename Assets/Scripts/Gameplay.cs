@@ -26,6 +26,10 @@ public class Gameplay : MonoBehaviour, IClickListener
     protected UIScore uiScore;
     [SerializeField]
     protected UserDataPrefs userData;
+    [SerializeField]
+    protected CellPool cellPool;
+    [SerializeField]
+    protected CardPool cardPool;
 
     [Header("Progression Parms")]
     [SerializeField]
@@ -46,6 +50,8 @@ public class Gameplay : MonoBehaviour, IClickListener
     private void Awake() 
     {
         userData.matchEvent = uiScore.DisplayData;
+        cellPool.Create();
+        cardPool.Create();
     }
 
     public void StartGame() 
@@ -91,7 +97,8 @@ public class Gameplay : MonoBehaviour, IClickListener
         {
             for (int x = 0; x < currentLevel.cols; x++, ++ind)
             {
-                gridBoard[x, y] = Instantiate(currentLevel.cellPrefab, gridLayoutGroup.transform);
+                gridBoard[x, y] = cellPool.Pick();
+                gridBoard[x, y].transform.SetParent(gridLayoutGroup.transform);
                 gridBoard[x, y].index = ind;
             }
         }
@@ -130,7 +137,8 @@ public class Gameplay : MonoBehaviour, IClickListener
             for (int j = 0; j < pairsList[i].Length; ++j) 
             {
                 Vector2Int cord = IndexToCords(pairsList[i][j] + 1, currentLevel);
-                Card prefabGO = Instantiate(currentLevel.cardPrefab, gridBoard[cord.x - 1, cord.y - 1].transform);
+                Card prefabGO = cardPool.Pick();
+                prefabGO.transform.SetParent(gridBoard[cord.x - 1, cord.y - 1].transform);
                 prefabGO.transform.localPosition = Vector3.zero;
                 gridBoard[cord.x - 1, cord.y - 1].SetCard(prefabGO);
                 prefabGO.SetData(cardsD[sel]);
@@ -156,7 +164,8 @@ public class Gameplay : MonoBehaviour, IClickListener
                 // make card in cell if was present
                 if (tarr[ind] != -1)
                 {
-                    Card prefabGO = Instantiate(currentLevel.cardPrefab, gridBoard[x, y].transform);
+                    Card prefabGO = cardPool.Pick();
+                    prefabGO.transform.SetParent(gridBoard[x, y].transform);
                     prefabGO.transform.localPosition = Vector3.zero;
 
                     gridBoard[x, y].SetCard(prefabGO);
@@ -183,12 +192,11 @@ public class Gameplay : MonoBehaviour, IClickListener
                     crdclicked.SetPlayable(false);
                     if (matched.Count >= currentLevel.pairs)
                     {
-                        // matched -> scored -> hide cards
                         foreach (var crd in matched)
                         {
                             playable.Remove(crd);
                             crd.SetPlayable(false);
-                            crd.gameObject.SetActive(false);
+                            cardPool.Add(crd);
                         }
                         matched.Clear();
                         userData.IncreaseTurn();
@@ -270,7 +278,15 @@ public class Gameplay : MonoBehaviour, IClickListener
 
     public void ResetGame()
     {
+        foreach (var itm in matched)
+            cardPool.Add(itm);
+        foreach (var itm in playable)
+            cardPool.Add(itm);
         matched.Clear();
+        playable.Clear();
+        for (int x = 0; x < currentLevel.cols; ++x)
+            for (int y = 0; y < currentLevel.rows; ++y)
+                cellPool.Add(gridBoard[x, y]);
         gameState = GameState.NotStarted;
     }
 

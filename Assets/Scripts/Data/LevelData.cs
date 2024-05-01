@@ -7,8 +7,6 @@ public class LevelData : ScriptableObject
         cols, 
         rows, 
         pairs;
-    public Cell cellPrefab;
-    public Card cardPrefab;
     public CardData[] cardSymbols;
     public float 
         padding, 
