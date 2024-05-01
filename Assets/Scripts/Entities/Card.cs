@@ -1,9 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Card : MonoBehaviour
+public class Card : MonoBehaviour, IClickable
 {
     public CardData cardData;
+    private IClickListener clickListener;
     private Image image;
     private bool isPlayable = false;
 
@@ -12,10 +13,15 @@ public class Card : MonoBehaviour
         image = GetComponent<Image>();
     }
 
-    public virtual void SetPlayable(bool pplayable) => isPlayable = pplayable;
-    public bool IsPlayable() => isPlayable;
+    public void SetListener(IClickListener pclickListener) => clickListener = pclickListener;
 
-    public virtual void SetData(CardData pCardData)  => cardData = pCardData;
+    public virtual void SetData(CardData pCardData) => cardData = pCardData;
+
+    public virtual void SetPlayable(bool pplayable) 
+    { 
+        isPlayable = pplayable;
+        GetComponent<Button>().enabled = isPlayable;
+    }
 
     public virtual void Reveal()
     {
@@ -27,4 +33,7 @@ public class Card : MonoBehaviour
         // Replace "cardBack" with the name of your card back sprite
         image.sprite = cardData.back;
     }
+    public void OnClicked() => clickListener.OnClicked(this);
+
+    public bool IsPlayable() => isPlayable;
 }

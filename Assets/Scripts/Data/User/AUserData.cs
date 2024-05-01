@@ -15,14 +15,14 @@ public abstract class AUserData : MonoBehaviour
     public abstract void SaveScore();
     public abstract void SaveLevel();
 
-    // Example method to increase score
+    // method to increase score
     public void IncreaseScore(int amount)
     {
         score += amount;
         SaveScore(); // Save score after increasing
     }
 
-    // Example method to level up
+    // method to level up
     public void LevelUp()
     {
         level++;

@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   symbol: {fileID: 21300000, guid: a0a32d086012c1b4da9d6f65f9e2625c, type: 3}
   back: {fileID: 21300000, guid: 531e2065e4cb5224ebadabcfa24ae77a, type: 3}
+  type: 8

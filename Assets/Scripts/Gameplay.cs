@@ -2,30 +2,52 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Gameplay : MonoBehaviour
+public enum GameState 
 {
-    // static data
-    [SerializeField]
-    protected Cell cellPrefab;
+    NotStarted,
+    Started,
+    Result
+}
+
+public delegate void MatchEvent(int level, int turns, int matches);
+
+public class Gameplay : MonoBehaviour, IClickListener
+{
+    [Header("Static Parms")]
     [SerializeField]
     protected LevelData[] levels;
     [SerializeField]
     protected Transform 
         cardsLayoutParent, 
         startPoint;
+    [SerializeField]
+    protected UIScore uiScore;
+    [SerializeField]
+    protected UserDataPrefs userData;
 
-    // progression data
+    [Header("Progression Parms")]
+    [SerializeField]
+    protected GameState gameState = GameState.NotStarted;
     [SerializeField]
     protected LevelData currentLevel;
     protected Cell[,] gridBoard;
     [SerializeField]
-    protected AUserData userData;
+    protected List<Card> playable, matched;
+
+    [Header("Debugging Parms")]
     public bool isForcedLevel = false;
     public int forcedLevel = 0;
+
+    private void Awake() 
+    {
+        userData.matchEvent = uiScore.DisplayData;
+    }
 
     // Start is called before the first frame update
     private void Start()
     {
+        playable = new List<Card>();
+        matched = new List<Card>();
         userData.LoadData();
         if(isForcedLevel)
             LoadeLevel(levels[forcedLevel]);
@@ -44,7 +66,7 @@ public class Gameplay : MonoBehaviour
         {
             for (int x = 0; x < currentLevel.cols; x++, ++ind)
             {
-                gridBoard[x, y] = Instantiate(cellPrefab,
+                gridBoard[x, y] = Instantiate(currentLevel.cellPrefab,
                         startPoint.position + // starting point
                         new Vector3(cardWidth * x, -cardHeight * y, 0) +  // card post
                         new Vector3(x > 0 ? currentLevel.padding * x : 0, y > 0 ? -currentLevel.padding * y : 0, 0), // padding
@@ -93,7 +115,9 @@ public class Gameplay : MonoBehaviour
                 Vector2Int cord = IndexToCords(pairsList[i][j] + 1, currentLevel);
                 gridBoard[cord.x - 1, cord.y - 1].GetCard().SetData(cardsD[sel]);
                 gridBoard[cord.x - 1, cord.y - 1].GetCard().SetPlayable(true);
+                gridBoard[cord.x - 1, cord.y - 1].GetCard().SetListener(this);
                 gridBoard[cord.x - 1, cord.y - 1].GetCard().Reveal();
+                playable.Add(gridBoard[cord.x - 1, cord.y - 1].GetCard());
             }
             cardsD.RemoveAt(sel);
         }
@@ -101,7 +125,7 @@ public class Gameplay : MonoBehaviour
         for (int i = 0; i < indexes.Count; ++i)
         {
             Vector2Int cord = IndexToCords(indexes[i] + 1, currentLevel);
-            gridBoard[cord.x - 1, cord.y - 1].gameObject.SetActive(false);
+            gridBoard[cord.x - 1, cord.y - 1].GetCard().gameObject.SetActive(false);
         }
     }
 
@@ -125,10 +149,61 @@ public class Gameplay : MonoBehaviour
                    gridBoard[x, y].GetCard().Hide();
             }
         }
+        gameState = GameState.Started;
     }
 
-    public void ClearGrid() 
+    public void OnClicked(IClickable clickable) 
     {
-        
+        if (gameState == GameState.Started) 
+        {
+            Card crdclicked = clickable as Card;
+            if (matched.Count > 0)
+            {
+                if (matched[matched.Count - 1].cardData.type == crdclicked.cardData.type)
+                {
+                    matched.Add(crdclicked);
+                    crdclicked.SetPlayable(false);
+                    if (matched.Count >= currentLevel.pairs)
+                    {
+                        // matched -> scored -> hide cards
+                        foreach (var crd in matched)
+                        {
+                            playable.Remove(crd);
+                            crd.SetPlayable(false);
+                            crd.gameObject.SetActive(false);
+                        }
+                        matched.Clear();
+                        userData.IncreaseTurn();
+                        userData.IncreaseScore(1);
+                        if (playable.Count == 0)
+                        {
+                            userData.LevelUp();
+                            gameState = GameState.Result;
+                        }
+                        userData.LoadData();
+                    }
+                }
+                else
+                {
+                    userData.IncreaseTurn();
+                    foreach (var crd in matched)
+                        crd.SetPlayable(true);
+                    matched.Clear();
+                    HideAllCards();
+                    userData.LoadData();
+                }
+            }
+            else
+            {
+                matched.Add(crdclicked);
+                crdclicked.SetPlayable(false);
+            }
+        }
+    }
+
+    public void ResetGame() 
+    {
+        matched.Clear();
+        gameState = GameState.NotStarted;
     }
 }
