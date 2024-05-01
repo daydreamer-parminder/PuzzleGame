@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public enum GameState 
 {
@@ -20,9 +21,7 @@ public class Gameplay : MonoBehaviour, IClickListener
     [SerializeField]
     protected LevelData[] levels;
     [SerializeField]
-    protected Transform 
-        cardsLayoutParent, 
-        startPoint;
+    protected GridLayoutGroup gridLayoutGroup;
     [SerializeField]
     protected UIScore uiScore;
     [SerializeField]
@@ -54,53 +53,52 @@ public class Gameplay : MonoBehaviour, IClickListener
         playable = new List<Card>();
         matched = new List<Card>();
         userData.LoadData();
+        if (isForcedLevel)
+        {
+            LoadeLevel(levels[forcedLevel]);
+            SetUpCells();
+            MakePairsAndAssignCardsToGrid();
+            Invoke("HideAllCards", currentLevel.hidingTime);
+        }
+        else
         if (userData.inGame == 1)
         {
+            LoadeLevel(levels[userData.level - 1]);
+            SetUpCells();
             SetPreviousGameState();
         }
-        else 
+        else
         {
-            if (isForcedLevel)
-                LoadeLevel(levels[forcedLevel]);
-            else
-                LoadeLevel(levels[userData.level - 1]);
+            LoadeLevel(levels[userData.level - 1]);
+            SetUpCells();
+            MakePairsAndAssignCardsToGrid();
+            Invoke("HideAllCards", currentLevel.hidingTime);
         }
     }
 
-    public virtual void LoadeLevel(LevelData level) 
+    public virtual void LoadeLevel(LevelData level) => currentLevel = level;
+
+    public void SetUpCells() 
     {
-        currentLevel = level;
+        // make cells
         gridBoard = new Cell[currentLevel.cols, currentLevel.rows];
 
-        SetNewCardsOnGrid();
-        Invoke("HideAllCards", currentLevel.hidingTime);
-    }
+        gridLayoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        gridLayoutGroup.constraintCount = currentLevel.cols;
+        gridLayoutGroup.spacing = new Vector2(currentLevel.padding, currentLevel.padding);
 
-    public void SetNewCardsOnGrid() 
-    {
-        // make cells and cards
-
-        float cardWidth = currentLevel.cardPrefab.GetComponent<RectTransform>().rect.width;
-        float cardHeight = currentLevel.cardPrefab.GetComponent<RectTransform>().rect.height;
         for (int y = 0, ind = 0; y < currentLevel.rows; y++)
         {
             for (int x = 0; x < currentLevel.cols; x++, ++ind)
             {
-                gridBoard[x, y] = Instantiate(currentLevel.cellPrefab,
-                        startPoint.position + // starting point
-                        new Vector3(cardWidth * x, -cardHeight * y, 0) +  // card post
-                        new Vector3(x > 0 ? currentLevel.padding * x : 0, y > 0 ? -currentLevel.padding * y : 0, 0), // padding
-                        Quaternion.identity,
-                        cardsLayoutParent);
-                gridBoard[x, y].index = ind + 1;
-
-                Card prefabGO = Instantiate(currentLevel.cardPrefab, gridBoard[x, y].transform);
-                prefabGO.transform.localPosition = Vector3.zero;
-
-                gridBoard[x, y].SetCard(prefabGO);
+                gridBoard[x, y] = Instantiate(currentLevel.cellPrefab, gridLayoutGroup.transform);
+                gridBoard[x, y].index = ind;
             }
         }
+    }
 
+    public void MakePairsAndAssignCardsToGrid() 
+    {
         // make pairs
 
         int ttlCells = currentLevel.rows * currentLevel.cols;
@@ -123,6 +121,8 @@ public class Gameplay : MonoBehaviour, IClickListener
             pairsList.Add(pairs);
         }
 
+        // make cards on cells wrt to pairs
+
         List<CardData> cardsD = new List<CardData>(currentLevel.cardSymbols);
         for (int i = 0; i < pairsList.Count; ++i) 
         {
@@ -130,29 +130,21 @@ public class Gameplay : MonoBehaviour, IClickListener
             for (int j = 0; j < pairsList[i].Length; ++j) 
             {
                 Vector2Int cord = IndexToCords(pairsList[i][j] + 1, currentLevel);
-                gridBoard[cord.x - 1, cord.y - 1].GetCard().SetData(cardsD[sel]);
-                gridBoard[cord.x - 1, cord.y - 1].GetCard().SetPlayable(true);
-                gridBoard[cord.x - 1, cord.y - 1].GetCard().SetListener(this);
-                gridBoard[cord.x - 1, cord.y - 1].GetCard().Reveal();
-                playable.Add(gridBoard[cord.x - 1, cord.y - 1].GetCard());
+                Card prefabGO = Instantiate(currentLevel.cardPrefab, gridBoard[cord.x - 1, cord.y - 1].transform);
+                prefabGO.transform.localPosition = Vector3.zero;
+                gridBoard[cord.x - 1, cord.y - 1].SetCard(prefabGO);
+                prefabGO.SetData(cardsD[sel]);
+                prefabGO.SetPlayable(true);
+                prefabGO.SetListener(this);
+                prefabGO.Reveal();
+                playable.Add(prefabGO);
             }
             cardsD.RemoveAt(sel);
-        }
-
-        for (int i = 0; i < indexes.Count; ++i)
-        {
-            Vector2Int cord = IndexToCords(indexes[i] + 1, currentLevel);
-            gridBoard[cord.x - 1, cord.y - 1].GetCard().gameObject.SetActive(false);
         }
     }
 
     public void SetPreviousGameState()
     {
-        currentLevel = levels[userData.level - 1];
-        gridBoard = new Cell[currentLevel.cols, currentLevel.rows];
-
-        float cardWidth = currentLevel.cardPrefab.GetComponent<RectTransform>().rect.width;
-        float cardHeight = currentLevel.cardPrefab.GetComponent<RectTransform>().rect.height;
         string[] strArr = userData.gameState.Split(',');
         int[] tarr = new int[strArr.Length - 1];
         for (int i = 0; i < tarr.Length; ++i) 
@@ -161,14 +153,7 @@ public class Gameplay : MonoBehaviour, IClickListener
         {
             for (int x = 0; x < currentLevel.cols; x++, ++ind)
             {
-                gridBoard[x, y] = Instantiate(currentLevel.cellPrefab,
-                        startPoint.position + // starting point
-                        new Vector3(cardWidth * x, -cardHeight * y, 0) +  // card post
-                        new Vector3(x > 0 ? currentLevel.padding * x : 0, y > 0 ? -currentLevel.padding * y : 0, 0), // padding
-                        Quaternion.identity,
-                        cardsLayoutParent);
-                gridBoard[x, y].index = ind + 1;
-
+                // make card in cell if was present
                 if (tarr[ind] != -1)
                 {
                     Card prefabGO = Instantiate(currentLevel.cardPrefab, gridBoard[x, y].transform);
@@ -179,7 +164,6 @@ public class Gameplay : MonoBehaviour, IClickListener
                     prefabGO.SetPlayable(true);
                     prefabGO.SetListener(this);
                     playable.Add(prefabGO);
-                    //temp += gameStateData.grid[x, y].GetCard().cardData.type+",";
                 }
             }
         }
@@ -213,6 +197,7 @@ public class Gameplay : MonoBehaviour, IClickListener
                         {
                             userData.LevelUp();
                             gameState = GameState.Result;
+                            userData.SetGameState(false, "");
                             OnGameEndsCallBack.Invoke();
                         }
                         userData.LoadData();
