@@ -743,8 +743,8 @@ GameObject:
   m_Component:
   - component: {fileID: 448013948}
   - component: {fileID: 448013949}
-  - component: {fileID: 448013950}
   - component: {fileID: 448013951}
+  - component: {fileID: 448013952}
   m_Layer: 0
   m_Name: AudioManager
   m_TagString: Untagged
@@ -788,25 +788,9 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 0bd05763df902854a80475577a26666a, type: 3}
   - name: gameover
     clip: {fileID: 8300000, guid: 1fd31868d68903d4f9e2c4a3b7ef98f3, type: 3}
+  - name: combo
+    clip: {fileID: 8300000, guid: cc6699269b4c1d44ea1e860518b9bb73, type: 3}
   source: {fileID: 0}
---- !u!114 &448013950
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 448013947}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f7f7f2a9243f8d46a6c138292db98c8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  assetAddresses:
-  - Sfx\Bloody punch.wav
-  - Sfx\Bullet Impact 14.wav
-  - Sfx\Explosion 1.wav
-  - Sfx\Flare gun 5-2.wav
-  loadedAssets: []
 --- !u!82 &448013951
 AudioSource:
   m_ObjectHideFlags: 0
@@ -819,6 +803,102 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!82 &448013952
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 448013947}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 068e4c4ad1d18ff4aa0d5f98fd85ccaf, type: 3}
+  m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -1857,15 +1937,18 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fe060f292d4db634e8d79c83a7a5754d, type: 2}
   - {fileID: 11400000, guid: 00a642d510a5cd445964583a75f991b3, type: 2}
   - {fileID: 11400000, guid: 2a880a6308aca6c41b0a95e713233cf9, type: 2}
+  - {fileID: 11400000, guid: 2d3e57066a2caf2408fc2ca78990f586, type: 2}
+  - {fileID: 11400000, guid: 86b6fbccc85442d489a8cfe59492f724, type: 2}
+  - {fileID: 11400000, guid: 904afc28165f19045a0c0760dee319e1, type: 2}
+  - {fileID: 11400000, guid: cc5c9879b6b56ca4190c82575f610540, type: 2}
+  - {fileID: 11400000, guid: 608707cf560d13449bf3c92edc9b1b4a, type: 2}
+  - {fileID: 11400000, guid: e80c6ce0e6eb0f14db6a163d12d52794, type: 2}
+  - {fileID: 11400000, guid: 81c6291f8ef22a340907bd0a7d53fe2d, type: 2}
   gridLayoutGroup: {fileID: 1549864016}
   uiScore: {fileID: 1860394003}
   userData: {fileID: 1963502976}
   cellPool: {fileID: 775116979}
   cardPool: {fileID: 234974047}
-  gameState: 0
-  currentLevel: {fileID: 0}
-  playable: []
-  matched: []
   flipingEvent:
     m_PersistentCalls:
       m_Calls:
@@ -1911,7 +1994,7 @@ MonoBehaviour:
           m_StringArgument: mismatch
           m_BoolArgument: 0
         m_CallState: 2
-  gameOverEvent:
+  comboEvent:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 448013949}
@@ -1923,7 +2006,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: gameover
+          m_StringArgument: combo
           m_BoolArgument: 0
         m_CallState: 2
   OnGameEndsCallBack:
@@ -1953,8 +2036,14 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  gameState: 0
+  currentLevel: {fileID: 0}
+  playable: []
+  matched: []
   isForcedLevel: 0
   forcedLevel: 2
+  cntr: 0
+  startTmr: 0
 --- !u!4 &1788424137
 Transform:
   m_ObjectHideFlags: 0

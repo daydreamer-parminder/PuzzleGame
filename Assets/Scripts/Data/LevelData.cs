@@ -10,5 +10,6 @@ public class LevelData : ScriptableObject
     public CardData[] cardSymbols;
     public float 
         padding, 
-        hidingTime;
+        hidingTime,
+        comboTime;
 }

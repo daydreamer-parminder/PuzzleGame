@@ -12,11 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a005e5418021a546b457e88f0e2bdfb, type: 3}
   m_Name: Level2
   m_EditorClassIdentifier: 
-  cols: 4
+  cols: 3
   rows: 4
   pairs: 3
-  cellPrefab: {fileID: 1039680444507253284, guid: c9e182d85b5e52148a5cd4d63f2a5a73, type: 3}
-  cardPrefab: {fileID: 511409915903338341, guid: 25af2dc0df357124284ebc31b2293c85, type: 3}
   cardSymbols:
   - {fileID: 11400000, guid: fe767cdfe6d29c647bb4245199c0415c, type: 2}
   - {fileID: 11400000, guid: c8094012b7b12de4e936d141889fbafa, type: 2}
@@ -24,4 +22,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 42edb45df36dac94d99b3f1e0eba7bea, type: 2}
   - {fileID: 11400000, guid: 5dd78d18654b8f741860ae8f3daad6aa, type: 2}
   padding: 15
-  hidingTime: 2
+  hidingTime: 4
+  comboTime: 4

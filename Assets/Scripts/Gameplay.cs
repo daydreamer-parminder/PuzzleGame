@@ -34,6 +34,7 @@ public class Gameplay : MonoBehaviour, IClickListener
         flipingEvent,
         matchingEvent,
         misMatchingEvent,
+        comboEvent,
         OnGameEndsCallBack;
 
     [Header("Progression Parms")]
@@ -48,6 +49,8 @@ public class Gameplay : MonoBehaviour, IClickListener
     [Header("Debugging Parms")]
     public bool isForcedLevel = false;
     public int forcedLevel = 0;
+    public float cntr = 0;
+    public bool startTmr = false;
 
     private void Awake() 
     {
@@ -64,7 +67,7 @@ public class Gameplay : MonoBehaviour, IClickListener
         userData.LoadData();
         if (isForcedLevel)
         {
-            LoadeLevel(levels[forcedLevel]);
+            LoadeLevel(forcedLevel);
             SetUpCells();
             MakePairsAndAssignCardsToGrid();
             Invoke("HideAllCards", currentLevel.hidingTime);
@@ -72,20 +75,28 @@ public class Gameplay : MonoBehaviour, IClickListener
         else
         if (userData.inGame == 1)
         {
-            LoadeLevel(levels[userData.level - 1]);
+            LoadeLevel(userData.level - 1);
             SetUpCells();
             SetPreviousGameState();
         }
         else
         {
-            LoadeLevel(levels[userData.level - 1]);
+            LoadeLevel(userData.level - 1);
             SetUpCells();
             MakePairsAndAssignCardsToGrid();
             Invoke("HideAllCards", currentLevel.hidingTime);
         }
     }
 
-    public virtual void LoadeLevel(LevelData level) => currentLevel = level;
+    public virtual void LoadeLevel(int level) 
+    {
+        if (level >= 0 && level < levels.Length)
+            currentLevel = levels[level];
+        else
+        {
+            Debug.LogError("Create More Levels to play further !");
+        }
+    }
 
     public void SetUpCells() 
     {
@@ -205,9 +216,17 @@ public class Gameplay : MonoBehaviour, IClickListener
                         }
                         matched.Clear();
                         userData.IncreaseTurn();
-                        userData.IncreaseScore(1);
                         if (playable.Count == 0)
                         {
+                            if (cntr <= currentLevel.comboTime)
+                            {
+                                userData.IncreaseScore(currentLevel.pairs);
+                                comboEvent.Invoke();
+                                cntr = 0;
+                                startTmr = false;
+                            }
+                            else
+                                userData.IncreaseScore(1);
                             userData.LevelUp();
                             gameState = GameState.Result;
                             userData.SetGameState(false, "");
@@ -215,13 +234,19 @@ public class Gameplay : MonoBehaviour, IClickListener
                         }
                         else 
                         {
-                            matchingEvent.Invoke();
+                            if (cntr <= currentLevel.comboTime)
+                            {
+                                userData.IncreaseScore(currentLevel.pairs);
+                                comboEvent.Invoke();
+                                cntr = 0;
+                                startTmr = false;
+                            }
+                            else 
+                            {
+                                matchingEvent.Invoke();
+                            }
                         }
                         userData.LoadData();
-                    }
-                    else
-                    {
-                        matchingEvent.Invoke();
                     }
                 }
                 else
@@ -233,12 +258,16 @@ public class Gameplay : MonoBehaviour, IClickListener
                     HideAllCards();
                     userData.LoadData();
                     misMatchingEvent.Invoke();
+                    startTmr = false;
+                    cntr = 0;
                 }
             }
             else
             {
                 matched.Add(crdclicked);
                 crdclicked.SetPlayable(false);
+                cntr = 0;
+                startTmr = true;
                 flipingEvent.Invoke();
             }
         }
@@ -321,5 +350,11 @@ public class Gameplay : MonoBehaviour, IClickListener
         {
             userData.SetGameState(true, ParseGridToString());
         }
+    }
+
+    public void Update() 
+    {
+        if(startTmr)
+            cntr += Time.deltaTime;
     }
 }

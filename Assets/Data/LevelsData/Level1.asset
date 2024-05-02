@@ -15,8 +15,6 @@ MonoBehaviour:
   cols: 4
   rows: 3
   pairs: 2
-  cellPrefab: {fileID: 1039680444507253284, guid: 31fad309bf58a9544925a4ef6c1e28c3, type: 3}
-  cardPrefab: {fileID: 511409915903338341, guid: 15aa4ef47d5c6c3489d7aa177b08f172, type: 3}
   cardSymbols:
   - {fileID: 11400000, guid: 87ceb352746c7524991097c72cd275d4, type: 2}
   - {fileID: 11400000, guid: 90aa0b0bcc9e552449e6e1d909ec129e, type: 2}
@@ -26,3 +24,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3ca07743be426f647b427e232650a08b, type: 2}
   padding: 15
   hidingTime: 3
+  comboTime: 4
