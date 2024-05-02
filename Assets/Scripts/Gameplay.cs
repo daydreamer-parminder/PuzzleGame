@@ -30,6 +30,11 @@ public class Gameplay : MonoBehaviour, IClickListener
     protected CellPool cellPool;
     [SerializeField]
     protected CardPool cardPool;
+    public UnityEvent
+        flipingEvent,
+        matchingEvent,
+        misMatchingEvent,
+        OnGameEndsCallBack;
 
     [Header("Progression Parms")]
     [SerializeField]
@@ -39,14 +44,6 @@ public class Gameplay : MonoBehaviour, IClickListener
     protected Cell[,] gridBoard;
     [SerializeField]
     protected List<Card> playable, matched;
-    public UnityEvent 
-        flipingEvent, 
-        matchingEvent, 
-        misMatchingEvent, 
-        gameOverEvent;
-
-    [Header("Progression Parms")]
-    public UnityEvent OnGameEndsCallBack;
 
     [Header("Debugging Parms")]
     public bool isForcedLevel = false;
@@ -214,7 +211,6 @@ public class Gameplay : MonoBehaviour, IClickListener
                             userData.LevelUp();
                             gameState = GameState.Result;
                             userData.SetGameState(false, "");
-                            gameOverEvent.Invoke();
                             OnGameEndsCallBack.Invoke();
                         }
                         else 
