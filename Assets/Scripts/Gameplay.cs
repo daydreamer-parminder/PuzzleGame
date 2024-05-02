@@ -205,7 +205,7 @@ public class Gameplay : MonoBehaviour, IClickListener
                 if (matched[matched.Count - 1].cardData.type == crdclicked.cardData.type)
                 {
                     matched.Add(crdclicked);
-                    crdclicked.SetPlayable(false);
+                    //crdclicked.SetPlayable(false);
                     if (matched.Count >= currentLevel.pairs)
                     {
                         foreach (var crd in matched)
@@ -265,7 +265,7 @@ public class Gameplay : MonoBehaviour, IClickListener
             else
             {
                 matched.Add(crdclicked);
-                crdclicked.SetPlayable(false);
+                //crdclicked.SetPlayable(false);
                 cntr = 0;
                 startTmr = true;
                 flipingEvent.Invoke();
