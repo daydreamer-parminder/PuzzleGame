@@ -52,4 +52,6 @@ public class ObjectPool<T> : MonoBehaviour
         foreach (var item in pool) { Destroy(item.gameObject); }
         pool.Clear();
     }
+
+    public T GetPrefab() => prefab;
 }

@@ -39,6 +39,11 @@ public class Gameplay : MonoBehaviour, IClickListener
     protected Cell[,] gridBoard;
     [SerializeField]
     protected List<Card> playable, matched;
+    public UnityEvent 
+        flipingEvent, 
+        matchingEvent, 
+        misMatchingEvent, 
+        gameOverEvent;
 
     [Header("Progression Parms")]
     public UnityEvent OnGameEndsCallBack;
@@ -50,6 +55,7 @@ public class Gameplay : MonoBehaviour, IClickListener
     private void Awake() 
     {
         userData.matchEvent = uiScore.DisplayData;
+        cardPool.GetPrefab().GetComponent<RectTransform>().sizeDelta = cellPool.GetPrefab().GetComponent<RectTransform>().sizeDelta;
         cellPool.Create();
         cardPool.Create();
     }
@@ -86,11 +92,13 @@ public class Gameplay : MonoBehaviour, IClickListener
 
     public void SetUpCells() 
     {
+        RectTransform rtf = cellPool.GetPrefab().GetComponent<RectTransform>();
         // make cells
         gridBoard = new Cell[currentLevel.cols, currentLevel.rows];
 
         gridLayoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         gridLayoutGroup.constraintCount = currentLevel.cols;
+        gridLayoutGroup.cellSize = new Vector2(rtf.rect.width, rtf.rect.height);
         gridLayoutGroup.spacing = new Vector2(currentLevel.padding, currentLevel.padding);
 
         for (int y = 0, ind = 0; y < currentLevel.rows; y++)
@@ -206,9 +214,18 @@ public class Gameplay : MonoBehaviour, IClickListener
                             userData.LevelUp();
                             gameState = GameState.Result;
                             userData.SetGameState(false, "");
+                            gameOverEvent.Invoke();
                             OnGameEndsCallBack.Invoke();
                         }
+                        else 
+                        {
+                            matchingEvent.Invoke();
+                        }
                         userData.LoadData();
+                    }
+                    else
+                    {
+                        matchingEvent.Invoke();
                     }
                 }
                 else
@@ -219,12 +236,14 @@ public class Gameplay : MonoBehaviour, IClickListener
                     matched.Clear();
                     HideAllCards();
                     userData.LoadData();
+                    misMatchingEvent.Invoke();
                 }
             }
             else
             {
                 matched.Add(crdclicked);
                 crdclicked.SetPlayable(false);
+                flipingEvent.Invoke();
             }
         }
     }
