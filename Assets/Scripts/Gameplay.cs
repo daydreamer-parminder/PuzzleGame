@@ -202,64 +202,71 @@ public class Gameplay : MonoBehaviour, IClickListener
             Card crdclicked = clickable as Card;
             if (matched.Count > 0)
             {
-                if (matched[matched.Count - 1].cardData.type == crdclicked.cardData.type)
+                if (!matched.Contains(crdclicked))
                 {
-                    matched.Add(crdclicked);
-                    //crdclicked.SetPlayable(false);
-                    if (matched.Count >= currentLevel.pairs)
+                    if (matched[matched.Count - 1].cardData.type == crdclicked.cardData.type)
                     {
-                        foreach (var crd in matched)
+                        matched.Add(crdclicked);
+                        //crdclicked.SetPlayable(false);
+                        if (matched.Count >= currentLevel.pairs)
                         {
-                            playable.Remove(crd);
-                            crd.SetPlayable(false);
-                            cardPool.Add(crd);
-                        }
-                        matched.Clear();
-                        userData.IncreaseTurn();
-                        if (playable.Count == 0)
-                        {
-                            if (cntr <= currentLevel.comboTime)
+                            foreach (var crd in matched)
                             {
-                                userData.IncreaseScore(currentLevel.pairs);
-                                comboEvent.Invoke();
-                                cntr = 0;
-                                startTmr = false;
+                                playable.Remove(crd);
+                                crd.SetPlayable(false);
+                                cardPool.Add(crd);
+                            }
+                            matched.Clear();
+                            userData.IncreaseTurn();
+                            if (playable.Count == 0)
+                            {
+                                if (cntr <= currentLevel.comboTime)
+                                {
+                                    userData.IncreaseScore(currentLevel.pairs);
+                                    comboEvent.Invoke();
+                                    cntr = 0;
+                                    startTmr = false;
+                                }
+                                else
+                                    userData.IncreaseScore(1);
+                                userData.LevelUp();
+                                gameState = GameState.Result;
+                                userData.SetGameState(false, "");
+                                OnGameEndsCallBack.Invoke();
                             }
                             else
-                                userData.IncreaseScore(1);
-                            userData.LevelUp();
-                            gameState = GameState.Result;
-                            userData.SetGameState(false, "");
-                            OnGameEndsCallBack.Invoke();
-                        }
-                        else 
-                        {
-                            if (cntr <= currentLevel.comboTime)
                             {
-                                userData.IncreaseScore(currentLevel.pairs);
-                                comboEvent.Invoke();
-                                cntr = 0;
-                                startTmr = false;
+                                if (cntr <= currentLevel.comboTime)
+                                {
+                                    userData.IncreaseScore(currentLevel.pairs);
+                                    comboEvent.Invoke();
+                                    cntr = 0;
+                                    startTmr = false;
+                                }
+                                else
+                                {
+                                    matchingEvent.Invoke();
+                                }
                             }
-                            else 
-                            {
-                                matchingEvent.Invoke();
-                            }
+                            userData.LoadData();
                         }
+                    }
+                    else
+                    {
+                        userData.IncreaseTurn();
+                        foreach (var crd in matched)
+                            crd.SetPlayable(true);
+                        matched.Clear();
+                        HideAllCards();
                         userData.LoadData();
+                        misMatchingEvent.Invoke();
+                        startTmr = false;
+                        cntr = 0;
                     }
                 }
-                else
+                else 
                 {
-                    userData.IncreaseTurn();
-                    foreach (var crd in matched)
-                        crd.SetPlayable(true);
-                    matched.Clear();
-                    HideAllCards();
-                    userData.LoadData();
-                    misMatchingEvent.Invoke();
-                    startTmr = false;
-                    cntr = 0;
+                    // already seclected
                 }
             }
             else
